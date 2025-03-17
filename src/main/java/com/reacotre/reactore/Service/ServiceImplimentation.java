@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,26 +72,30 @@ public class ServiceImplimentation  implements StudentService{
     }
 
     @Override
-    public List<PerformanceContainer> groupStudentsByPerformance() {
-        List<Student> students = studentRepository.findAll();
-        // Group by performance level based on GPA
-        Map<String, Long> performanceCounts = students.stream()
-                .collect(Collectors.groupingBy(student -> {
-                    double gpa = student.getGpa();
-                    if (gpa >= 0.0 && gpa <= 4.0) {
-                        return "Poor";
-                    } else if (gpa >= 4.1 && gpa <= 7.0) {
-                        return "Average";
-                    } else if (gpa >= 7.1) {
-                        return "Excellent";
-                    } else {
-                        return "Unknown";
-                    }
-                }, Collectors.counting()));
+    public CompletableFuture<List<PerformanceContainer>> groupStudentsByPerformanceAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            // Fetch all students from the repository
+            List<Student> students = studentRepository.findAll();
 
-        return performanceCounts.entrySet().stream()
-                .map(entry -> new PerformanceContainer(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+            //use streams
+            Map<String, Long> performanceCounts = students.stream()
+                    .collect(Collectors.groupingBy(student -> {
+                        double gpa = student.getGpa();
+                        if (gpa >= 0.0 && gpa <= 4.0) {
+                            return "Poor";
+                        } else if (gpa >= 4.1 && gpa <= 7.0) {
+                            return "Average";
+                        } else if (gpa >= 7.1) {
+                            return "Excellent";
+                        } else {
+                            return "Unknown";
+                        }
+                    }, Collectors.counting()));
+
+            // Map the grouped result to a list of PerformanceContainer objects
+            return performanceCounts.entrySet().stream()
+                    .map(entry -> new PerformanceContainer(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+        });
     }
-
 }

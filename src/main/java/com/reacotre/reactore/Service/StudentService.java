@@ -3,6 +3,7 @@ package com.reacotre.reactore.Service;
 import com.reacotre.reactore.Entity.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface StudentService {
     StudentContainer countMaleAndFemaleStudents();
@@ -13,6 +14,6 @@ public interface StudentService {
 
     List<ActivityContainer> countStudentsByActivity();
 
-    List<PerformanceContainer> groupStudentsByPerformance();
+    CompletableFuture<List<PerformanceContainer>> groupStudentsByPerformanceAsync();
 
 }

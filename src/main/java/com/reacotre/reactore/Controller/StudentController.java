@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/students")
@@ -44,10 +45,10 @@ public class StudentController {
         return ResponseEntity.ok(activityCounts);
     }
 
-    @GetMapping("/performance-grouping")
-    public ResponseEntity<List<PerformanceContainer>> getPerformanceGrouping() {
-        List<PerformanceContainer> performanceGroups = studentService.groupStudentsByPerformance();
-        return ResponseEntity.ok(performanceGroups);
+    @GetMapping("/performance-grouping-async")
+    public CompletableFuture<ResponseEntity<List<PerformanceContainer>>> getPerformanceGroupingAsync() {
+        return studentService.groupStudentsByPerformanceAsync()
+                .thenApply(ResponseEntity::ok);
     }
 
 }
